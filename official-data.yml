@@ -1,0 +1,29 @@
+name: Check public NBS articles
+on:
+  schedule:
+    # UTC 02:17 = Beijing 10:17; scheduled workflows may be delayed.
+    - cron: '17 2 * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  update-public-data:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install scraper dependencies
+        run: pip install 'httpx>=0.27,<1' 'beautifulsoup4>=4.12,<5'
+      - name: Extract public announcement candidates
+        run: python scripts/update_nbs.py
+      - name: Commit public data only (if changed)
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/nbs-public.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'chore: update public NBS candidates'
+            git push
+          fi
