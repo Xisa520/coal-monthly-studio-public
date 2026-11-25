@@ -1,71 +1,73 @@
-# 煤炭市场月报智能编制平台 · GitHub Pages 公开版 V1.1
+# 煤炭市场数据图谱 V2.0（GitHub Pages 公开版）
 
-基于已有本地FastAPI月报工作台的**公开适配版**。它是独立静态网页，不需要Python后端，适用于分享给所有人访问。
+本版在 V1.1 月报编制工具的基础上新增**开箱即用的数据图谱首页**。不必先上传Excel，网站即可展示从业主提供的《2026年年报数据+图—煤炭篇回顾.xlsx》选取的历史统计数据；可以多年份比较、查看原始记录、搜索筛选、导出PNG图表和CSV。
 
-> **没有在此仓库放入任何实际内部月报、内部表格、经营数据、个人信息、AI API Key 或模型权重。** 系统不收集访问者上传的文件。原始文件仅在访问者浏览器内读取。程序从第三方CDN加载固定版本的Excel解析和Word压缩依赖；请按单位的信息安全要求决定是否允许用外部网站处理真实工作数据。
+## 一、内置可视化内容
 
-## 一、发布到 GitHub Pages：操作步骤
+- 全国年度原煤产量（2005—2025年）
+- 全国月度原煤产量（2022—2025年；注意1—2月为合计）
+- 全国分省区原煤产量（2019—2025年）
+- 全国年度煤炭进口量（2006—2025年）
+- 全国月度煤炭进口量（2019—2025年；注意1—2月为合计）
+- 煤炭采选业投资额（2011—2025年）
+- 全国历史煤炭消费量（仅纳入原表标为统计局口径的2020年及以前年份）
+- 进口煤分煤种结构（2021—2025年）
+- 原煤生产综合能耗（2020—2025年）
 
-1. 登录 GitHub，点击右上角 `+` → **New repository**，仓库名推荐 `coal-monthly-studio-public`。选择 **Public**，点击 **Create repository**。
-2. **不要将ZIP压缩包作为单个文件上传**。请先解压，把包含 `index.html`、`app.js`、`style.css`、`data/`、`scripts/`、`.github/` 等文件直接上传至仓库根目录。建议使用 **GitHub Desktop** 或 Git 命令，以保证 `.github/workflows/` 等目录完整上传。
-3. 命令行方法（在本项目解压后的根目录打开PowerShell）：
-   ```powershell
-   git init
-   git branch -M main
-   git add .
-   git commit -m "Publish public coal monthly studio"
-   git remote add origin https://github.com/你的用户名/coal-monthly-studio-public.git
-   git push -u origin main
-   ```
-4. 进入仓库 **Settings → Pages → Build and deployment → Source**，选择 **GitHub Actions**。
-5. 到 **Actions** 页面，等待 `Deploy public GitHub Pages` 工作流成功；如未自动运行，打开工作流点击 **Run workflow**。
-6. 发布后的网址一般为：`https://你的用户名.github.io/coal-monthly-studio-public/`。实际URL以 Pages 页面显示为准。
+共9个专题、399条底稿记录。`data/coal-public.json` 与 `data/coal-public.js` 含相同数据，用于网站直接展示及本地直接打开预览；避免公开的统计页对服务器、Python或数据库的依赖。
 
-如果第一次运行 GitHub Actions 时提示权限受限，进入仓库 **Settings → Actions → General** 核实允许 Actions 运行。自动采集任务推送提交可能需要在同一页的 **Workflow permissions** 开启 `Read and write permissions`；如权限策略不允许，就保留人工上传/查看官网功能，不启用自动提交。
+**重要：** 这些是原工作底稿中的数值，**不是**逐项从国家统计局/海关实时核验后的正式发布数据。2025年部分数值和投资额可能为底稿整理或推算，正式使用前需由使用者进行来源、口径、版权审核。
 
-## 二、网页功能与限制
+## 二、三类原始Excel的自动可视化
 
-| 功能 | 公开版 V1.1 |
-| --- | --- |
-| XLSX、XLSM、XLS、CSV 文件读取 | ✅ 浏览器内读取，不执行VBA |
-| 用户选择工作表、日期列、数据列、单位、核验状态 | ✅ |
-| 记录数、趋势图、最近值、变化量 | ✅ |
-| 标准化数据导出为Excel | ✅ |
-| 煤炭月报六章节、摘要、预测表编辑 | ✅ |
-| 本浏览器草稿保存 | ✅ 使用 localStorage，仅存报告文本 |
-| A4 Word .docx 导出及简单附图 | ✅ 需人工核对分页和字体 |
-| 国家统计局公开公告候选信息 | ✅ Actions定期尝试采集，失败则保持上次记录 |
-| 大模型自动生成分析内容 | ⚠️ 公开版暂为提示词生成与复制；**不含可直接调用的安全多用户AI后端** |
-| 多人账户、共享数据库、统一审批流 | ❌ 需要独立认证与后端服务 |
-| 百分百复刻第54期Word版式、宏和全部图表 | ❌ 属于后续版本目标 |
+进入首页底部“原始工作簿·智能可视化”，上传本地工作簿（文件不会被传给GitHub服务器）：
 
-**重要：** Excel文件只有选择日期列、数值列并点击“导入所选指标”后才进入浏览器内指标库。程序不会推测上年历史公布值来冒充国家统计局**可比口径同比**。
+1. **《00.煤炭市场多维数据动态分析表(1).xlsm》**：自动识别环渤海/秦港库存、秦港平仓价、鄂尔多斯坑口价、大秦线发运量、环渤海调入/调出、港口吞吐、内河及各区域港口库存等B/C列时序；对`25省日耗`、`25省库存`、`25省可用天数`的AA（日耗/库存/可用天数合计）、AB（内陆17省）和AC（沿海八省）分别生成跨年度比较曲线。**不执行XLSM内的VBA宏**。
+2. **《长协价曲线(1).xlsx》**：自动识别A列日期、B列秦港市场煤价、C列年度长协价，生成双曲线对比。
+3. **《2026年年报数据+图-煤炭篇回顾.xlsx》**：公用统计指标已经预置；上传后还可额外识别其第33张价格/指数专题原始曲线。本功能不重现原文件全部72幅Excel图表，也不重新计算所有工作表公式。
 
-## 三、关于国家统计局定时更新
+当前使用浏览器SheetJS组件读取本地Excel（需浏览器可访问组件CDN），其他人不会看到当前用户上传的工作簿；刷新网页会清除本次会话的导入结果。
 
-- `.github/workflows/official-data.yml` 默认每天北京时间约10:17尝试更新；GitHub计划任务不是实时任务，可能延迟或暂停。
-- 使用 `scripts/nbs.py` 仅访问 `www.stats.gov.cn` 的HTTPS官方域名，解析“能源生产情况”新闻稿；它**不是**国家数据平台官方API。
-- 解析结果只有“候选”，不自动归为已核验，也不自动插入任何人的报告。
-- 如果官网网页结构变化、限制自动化访问或运行失败，旧数据文件不会被伪造覆盖。
-- 工作流将公开候选公告写到 `data/nbs-public.json`。注意 Actions 按计划任务运行时，GitHub 仓库若长期无活动，可能停用计划工作流，需要在 Actions 界面手动启用。
+旧版“Excel数据导入”仍保留手动列映射，可处理更多不在预设规则内的表格。月报编辑、Word导出、AI提示词和国家统计局候选数据页面沿用V1.1。
 
-## 四、关于隐私、安全及使用限制
+## 三、如何更新你已发布的GitHub仓库
 
-1. 本项目代码可公开，**禁止直接将工作单位未批准公开的材料上传GitHub**。公开Pages站点的所有静态文件可被任何访问者读取。
-2. 浏览器内导入的Excel不会由本项目上传到服务器；但是项目当前从CDN加载第三方脚本。若涉及机密文件，不应通过未经批准的公网网页处理。
-3. 本版不提供API Key输入框，是为了避免将开发者统一密钥暴露给所有访问者，也避免共享AI额度被滥用。想自动调用大模型，请部署独立网关并加用户认证、配额、调用日志、数据外发授权。
-4. GitHub Pages并非私有数据处理平台，`localStorage`只能存小体量报告草稿，不应当作数据库。浏览器清理数据后草稿可能丢失，请保存Word。
-5. 公式和单元格值由 Excel解析库读取，**不执行Excel的VBA宏**；图表为新绘制，不会直接复现Excel原有复杂图表或宏按钮。
-6. 所有报表、图表与AI提示词仅辅助研究，不保证事实准确；报送前必须复核。
+现有仓库：`https://github.com/Xisa520/coal-monthly-studio-public`
 
-## 五、进一步部署完整服务版
+**最快方式（增量包）**：
 
-若要多人匿名使用且分别保存上传文件、后台集中存储、自动AI生成、自动抓取、共享研报及用户权限体系：需开发身份认证、多租户数据隔离、PostgreSQL或持久存储、文件隔离、队列任务和审核日志，再将Python后端部署到Render/Railway等云服务或单位授权服务器。**不能直接将原V1.0 FastAPI+SQLite包裸露在公网上。**
+1. 打开仓库的`main`分支；选择 `Add file → Upload files`。
+2. 在电脑上解压`煤炭市场数据图谱_V2.0_GitHub增量更新包.zip`。
+3. 将根目录的`index.html`、`atlas.js`、`atlas.css`以及其中的整个`data`文件夹拖入GitHub上传区，确认包含 `data/coal-public.json`、`data/coal-public.js`。建议一并替换根目录的`README.md`。
+4. 如果网页上传时因为旧文件同名无法覆盖，请直接在仓库用 `Edit` 替换内容，或用GitHub Desktop在本地复制文件后提交推送（见下）。
+5. 点击 `Commit changes` 后，原有 `.github/workflows/pages.yml` 将自动触发GitHub Pages部署，无需重建工作流。
+6. 在 `Actions → Deploy public GitHub Pages` 确认绿色对勾，再打开 `https://xisa520.github.io/coal-monthly-studio-public/` 并强制刷新（`Ctrl+F5`）。
 
-## 六、本地预览
+**推荐的大文件更新方式：GitHub Desktop**
 
-静态网站可用 VS Code 的 Live Server 打开；也可在项目根目录运行 `python -m http.server 8000` 后打开 `http://localhost:8000`。联网时需可访问CDN。GitHub Pages上无需在本机启动服务。
+1. 下载并安装 [GitHub Desktop](https://desktop.github.com/) ，用自己的GitHub账号登录。
+2. `File → Clone repository` 选择现有仓库并克隆到电脑。
+3. 解压完整包，把文件复制到克隆得到的仓库目录中，覆盖同名代码文件（保留`.git`文件夹）；**不要复制含内部数据的原始Excel或Word**。
+4. 返回 GitHub Desktop，填入提交说明 `Upgrade public dashboard to V2.0`，点击 `Commit to main`，再点击 `Push origin`。
+5. 检查GitHub Actions自动发布状态。
 
-## 开源许可
+> HTML + JS是静态前端，可以部署GitHub Pages。GitHub Pages本身不运行Python后端，不适合直接放入第三方AI密钥、不支持服务器端持续运行的私人工作数据库。国家统计局候选数据的后台检查工作流仍为试验性功能。
 
-应用自有代码使用MIT许可，第三方Excel解析库SheetJS的许可证及CDN依赖按其各自声明执行；使用者应自行检查后续公开分发合规要求。
+## 四、项目文件
+
+- `index.html`：主页、图谱页面和旧版月报页面
+- `atlas.css`：新增图谱页面样式
+- `atlas.js`：SVG交互绘图、筛选、导出与浏览器自动识别Excel
+- `data/coal-public.json` + `data/coal-public.js`：公开历史统计数据集
+- `scripts/build_public_dataset.py`：从原年度Excel工作簿筛选生成公开统计JSON（只在开发者本机运行，**请勿上传原Excel**）
+- `app.js`, `style.css`：V1.1原有月报编辑、上传映射、Word导出等
+- `.github/workflows/pages.yml`：自动部署工作流
+- `.github/workflows/official-data.yml`：国家统计局候选公告检查（未替代正式核验）
+
+## 五、公开发布和数据安全边界
+
+**已选择不包含：** 第54期内部月报原文、集团经营生产和欠计划数值、原始`xlsm`日度监测表、原始长协价Excel、商业监测数据的全集、模型API密钥及任何账号信息。
+
+网站中预置的统计数据来自业主提供工作簿的指定统计栏目，且保留原表来源标签，不代表这些数据在权利或统计口径上已经完全获得对外发布许可。上线前仍应由维护者核对公开来源和发布权限。网站访问者自行上传的数据始终在其浏览器中处理，不能自动共享给其他访问者。
+
+软件代码保留MIT LICENSE；此授权**不意味着**对原始统计数据、月报文本、商业数据授予任何额外版权或数据库使用权。

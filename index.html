@@ -5,13 +5,15 @@
 <meta name="referrer" content="no-referrer">
 <title>煤炭市场月报智能编制平台 · 公开版</title>
 <link rel="stylesheet" href="./style.css">
+<link rel="stylesheet" href="./atlas.css">
 </head>
 <body>
 <div class="layout">
 <aside class="sidebar">
  <div class="brand"><div class="logo">煤</div><div><b>煤炭市场研究台</b><small>PUBLIC RESEARCH STUDIO</small></div></div>
  <div class="nav-label">研究工作区</div>
- <button class="nav active" data-view="dashboard">▧　数据看板</button>
+ <button class="nav active" data-view="atlas">▦　煤炭数据图谱 <small class="atlas-pill">内置数据</small></button>
+ <button class="nav" data-view="dashboard">▧　上传指标看板</button>
  <button class="nav" data-view="upload">▤　Excel 数据导入</button>
  <button class="nav" data-view="report">▣　月报编辑与导出</button>
  <button class="nav" data-view="official">◎　国家统计局候选数据</button>
@@ -21,7 +23,35 @@
 <div class="body">
  <header class="top"><span>煤炭供需 · 价格 · 库存 · 市场研判</span><div class="top-right"><span id="sessionStatus">等待导入数据</span><label>报告月份 <input type="month" id="month"></label></div></header>
  <main>
- <section data-section="dashboard" class="view active">
+
+ <section data-section="atlas" class="view active atlas-view" id="atlasView">
+   <div class="atlas-hero">
+     <div class="atlas-hero-copy"><div class="atlas-eyebrow">COAL MARKET · DATA INTELLIGENCE CENTER / 2026</div>
+     <h1>煤炭市场<span>数据图谱</span></h1><p>基于你提供的年报数据底稿，直接展示全国产量、分省区结构、煤炭进口与投资走势。无需先上传，打开即可分析。</p>
+     <div class="atlas-hero-notes"><span>◉　内置历史统计数据</span><span>◈　多年份交互对比</span><span>◫　数据来源可追溯</span></div></div>
+     <div class="atlas-hero-side"><div class="atlas-orbit"><div class="atlas-orbit-dot"></div><div class="atlas-orbit-center">煤<br><small>数据引擎</small></div></div><div class="atlas-hero-foot">STATISTICS / CHARTS / ANALYSIS</div></div>
+   </div>
+   <div class="atlas-sectionlabel"><div><small>KEY INDICATORS</small><h2>核心指标速览</h2></div><span id="atlasDatasetCount">读取历史统计数据中…</span></div>
+   <div class="atlas-kpis" id="atlasKpis"><div class="atlas-loading">正在装载已内置的年度数据…</div></div>
+   <div class="atlas-sectionlabel"><div><small>MARKET SNAPSHOT</small><h2>市场运行全景</h2></div><span>点击图卡进入专题分析</span></div>
+   <div class="atlas-mini-grid" id="atlasMiniGrid"><div class="atlas-loading">正在生成历史走势…</div></div>
+   <div class="atlas-sectionlabel atlas-sectionlabel-detail"><div><small>INTERACTIVE DATA EXPLORER</small><h2>专题指标研判台</h2></div><button id="atlasScrollLocal" type="button" class="atlas-ghost">分析我的原始Excel ↓</button></div>
+   <div class="atlas-explorer" id="atlasExplorer">
+     <div class="atlas-filter-band"><div class="atlas-filter-line"><label>专题领域 <select id="atlasCategory"></select></label><label class="atlas-select-wide">指标序列 <select id="atlasDataset"></select></label><label>图表类型 <select id="atlasChartType"><option value="auto">推荐图表</option><option value="line">趋势折线图</option><option value="bar">对比柱状图</option></select></label></div>
+       <div class="atlas-group-line"><div><strong>对比年份 / 指标</strong><small>点击切换、支持多选</small></div><div id="atlasGroupOptions" class="atlas-group-chips"></div></div></div>
+     <div class="atlas-mainchart-title"><div><h3 id="atlasDetailTitle">指标趋势分析</h3><p id="atlasDetailDescription"></p></div><div class="atlas-toolbuttons"><button id="atlasSavePng" class="atlas-ghost">保存PNG</button><button id="atlasSaveCsv" class="atlas-ghost">导出CSV</button></div></div>
+     <div id="atlasMainChart" class="atlas-main-chart" role="img" aria-label="煤炭市场指标可视化图表"></div>
+     <div id="atlasDetailStats" class="atlas-detail-stats"></div>
+     <div class="atlas-source" id="atlasSource"></div>
+     <div class="atlas-table-title"><h3>指标原始数据</h3><div><input type="search" id="atlasSearch" placeholder="筛选省区 / 月份 / 年份" aria-label="筛选指标数据"><span id="atlasRowCount"></span></div></div>
+     <div id="atlasTable" class="atlas-data-table"></div>
+   </div>
+   <div class="atlas-sectionlabel" id="atlasLocalSection"><div><small>YOUR WORKBOOK · LOCAL ONLY</small><h2>原始工作簿 · 智能可视化</h2></div><span>针对你提供的三类Excel设计识别规则</span></div>
+   <div class="atlas-local-grid"><div class="atlas-import-card"><div class="atlas-upload-symbol">⇧</div><h3>拖入你的Excel，自动绘制整套指标</h3><p>识别《煤炭市场多维数据动态分析表》的港口库存、煤价、发运量、沿海八省日耗/库存/可用天数；识别《长协价曲线》的市场价与长协价。</p><label for="atlasFile" class="atlas-file-label">选择 Excel / XLSM 文件</label><input id="atlasFile" type="file" accept=".xlsx,.xlsm,.xls" multiple hidden><div id="atlasImportStatus" class="atlas-import-status">尚未导入 · 浏览器本地处理，不上传服务器</div></div>
+   <div class="atlas-local-summary"><h3>内置指标 vs. 本地工作数据</h3><div class="atlas-split"><div><b>公开统计图库</b><strong id="atlasPublicNum">—</strong><small>打开网站即显示，来自筛选后的历史统计底稿</small></div><div><b>浏览器自动识别</b><strong id="atlasLocalNum">0</strong><small>工作表指标数量；仅当前网页会话可见</small></div></div><p><b>公开发布边界：</b>集团经营数据、付费市场监测数据及内部月报原文不直接写入公开仓库。原始文件在用户浏览器读取，其他访问者不可见。</p></div></div>
+   <div class="atlas-disclaimer">数据说明：预置图表由你提供的《2026年年报数据+图—煤炭篇回顾》筛选生成，保留原表数值、单位和工作表来源。尚未对全部指标进行国家统计局/海关逐项联网核验。正式对外使用须核对统计口径、引用权和修订值。</div>
+ </section>
+ <section data-section="dashboard" class="view">
   <div class="intro"><div><p class="eyebrow">COAL MARKET INTELLIGENCE</p><h1>煤炭市场月报智能编制平台</h1><p>从数据上传、指标比较到报告初稿，实现可追溯、可复核的煤炭市场分析流程。</p></div><button class="primary" data-switch="upload">导入数据 →</button></div>
   <div class="cards"><div class="metric"><small>已导入指标</small><strong id="metricIndicators">0</strong><span>个指标序列</span></div><div class="metric"><small>数据记录总数</small><strong id="metricRows">0</strong><span>条记录</span></div><div class="metric"><small>本月已完成章节</small><strong id="metricSections">0/6</strong><span>月报编写进度</span></div></div>
   <div class="panel"><div class="panel-head"><div><h2>趋势与指标对比</h2><p>上传数据后，选择指标，自动展示时序曲线及最新记录</p></div><select id="chartIndicator"><option value="">请选择指标</option></select></div><div class="canvas-wrap"><canvas id="lineChart" width="1000" height="360" aria-label="指标变化趋势"></canvas><p class="chart-empty" id="chartEmpty">尚未导入数据，请先上传Excel或CSV。</p></div><div id="chartStats" class="stats"></div></div>
@@ -50,10 +80,12 @@
   <div class="notice warn">GitHub Pages本身无法托管安全的AI密钥或Python代理服务。要实现多人独立、自动调用DeepSeek/千问并将结果写回网站，需要额外部署带用户认证和额度控制的后端。</div>
  </section>
  </main>
- <footer>煤炭市场月报智能编制平台 · 公开版 V1.1 · 研究辅助工具，输出须人工复核</footer>
+ <footer>煤炭市场数据图谱 · 公共统计版 V2.0 · 研究辅助工具，输出须人工复核</footer>
 </div></div>
 <div id="toast" role="status" aria-live="polite"></div>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" defer></script>
 <script src="./app.js" defer></script>
+<script src="./data/coal-public.js" defer></script>
+<script src="./atlas.js" defer></script>
 </body></html>
