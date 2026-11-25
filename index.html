@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>煤炭市场月报智能编制平台 · 公开版</title>
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar">
+ <div class="brand"><div class="logo">煤</div><div><b>煤炭市场研究台</b><small>PUBLIC RESEARCH STUDIO</small></div></div>
+ <div class="nav-label">研究工作区</div>
+ <button class="nav active" data-view="dashboard">▧　数据看板</button>
+ <button class="nav" data-view="upload">▤　Excel 数据导入</button>
+ <button class="nav" data-view="report">▣　月报编辑与导出</button>
+ <button class="nav" data-view="official">◎　国家统计局候选数据</button>
+ <button class="nav" data-view="ai">✧　AI 写作助手</button>
+ <div class="sidebar-foot"><span class="status-dot"></span> 浏览器本地处理<br><small>数据仅在本次网页会话中处理，不会上传到本站服务器。</small></div>
+</aside>
+<div class="body">
+ <header class="top"><span>煤炭供需 · 价格 · 库存 · 市场研判</span><div class="top-right"><span id="sessionStatus">等待导入数据</span><label>报告月份 <input type="month" id="month"></label></div></header>
+ <main>
+ <section data-section="dashboard" class="view active">
+  <div class="intro"><div><p class="eyebrow">COAL MARKET INTELLIGENCE</p><h1>煤炭市场月报智能编制平台</h1><p>从数据上传、指标比较到报告初稿，实现可追溯、可复核的煤炭市场分析流程。</p></div><button class="primary" data-switch="upload">导入数据 →</button></div>
+  <div class="cards"><div class="metric"><small>已导入指标</small><strong id="metricIndicators">0</strong><span>个指标序列</span></div><div class="metric"><small>数据记录总数</small><strong id="metricRows">0</strong><span>条记录</span></div><div class="metric"><small>本月已完成章节</small><strong id="metricSections">0/6</strong><span>月报编写进度</span></div></div>
+  <div class="panel"><div class="panel-head"><div><h2>趋势与指标对比</h2><p>上传数据后，选择指标，自动展示时序曲线及最新记录</p></div><select id="chartIndicator"><option value="">请选择指标</option></select></div><div class="canvas-wrap"><canvas id="lineChart" width="1000" height="360" aria-label="指标变化趋势"></canvas><p class="chart-empty" id="chartEmpty">尚未导入数据，请先上传Excel或CSV。</p></div><div id="chartStats" class="stats"></div></div>
+  <div class="panel"><h2>数据质量原则</h2><div class="rules"><div><b>01 · 统计口径</b><p>官方同比与自行计算同比分开存储，不混用月度、累计和不同煤种数据。</p></div><div><b>02 · 来源可追溯</b><p>每条记录保留上传文件、工作表、指标、单位及审核状态。</p></div><div><b>03 · 人工审核</b><p>采集候选值和AI草稿不能未经复核直接成为正式报告。</p></div></div></div>
+ </section>
+ <section data-section="upload" class="view">
+  <div class="section-title"><p class="eyebrow">LOCAL DATA IMPORT</p><h1>Excel 数据中心</h1><p>支持 XLSX、XLSM、XLS、CSV。含宏表格只读取单元格数据，不运行VBA。</p></div>
+  <div class="two"><div class="panel"><h2>上传数据</h2><label class="drop" for="fileInput">⇪<br><strong>选择文件（或拖放到这里）</strong><small>仅浏览器读取，单文件建议小于20MB</small></label><input id="fileInput" type="file" accept=".xlsx,.xlsm,.xls,.csv" multiple hidden><div id="uploadMessage" class="muted small">可连续上传多个文件，导入后选择工作表和列映射。</div><div id="workbookList" class="workbooks"></div></div>
+  <div class="panel"><h2>数据映射</h2><div class="form-grid"><label>选择工作簿<select id="wbSelect"></select></label><label>工作表<select id="sheetSelect"></select></label><label>日期列<select id="dateCol"></select></label><label>数值列<select id="valueCol"></select></label><label>指标名称<input id="indicatorName" placeholder="例如：秦皇岛5500大卡动力煤市场价"></label><label>指标单位<input id="indicatorUnit" placeholder="例如：元/吨"></label><label>标题行<select id="headerRow"></select></label><label>核验状态<select id="verified"><option value="false">待核验</option><option value="true">已人工核验</option></select></label></div><div class="actions"><button id="importSeries" class="primary">导入所选指标</button><button id="showPreview" class="quiet">预览数据</button></div><div class="small muted" id="mappingTip">选择工作表后预览前8行并确认列映射；自动推断不代替人工核对。</div></div></div>
+  <div class="panel"><div class="panel-head"><h2>原表预览（最多展示8行×12列）</h2><button class="quiet" id="exportData">导出全部已导入数据.xlsx</button></div><div class="table-scroll" id="previewTable"><p class="muted">暂无预览。</p></div></div>
+  <div class="panel"><div class="panel-head"><h2>当前指标库</h2><button id="clearData" class="quiet danger">清空本次数据</button></div><div id="seriesList" class="series-list">暂无数据。</div></div>
+ </section>
+ <section data-section="report" class="view">
+  <div class="section-title title-flex"><div><p class="eyebrow">REPORT WORKSPACE</p><h1>煤炭月报编制工作台</h1><p>按照“市场回顾四部分 + 形势研判两部分”组织正文。</p></div><div class="actions"><button id="qualityCheck" class="quiet">质量检查</button><button id="saveDraft" class="quiet">本机保存草稿</button><button id="downloadDocx" class="primary">导出Word .docx</button></div></div>
+  <div class="notice">这是可公开使用的<strong>空白通用模板</strong>，不会带入任何内部月报内容。正式对外使用前，请审核数据来源、预测结果和报告版权。</div>
+  <div class="panel report-panel"><div class="form-grid"><label>报告标题<input id="reportTitle" value="煤炭市场月度分析报告"></label><label>审核状态<select id="reportVerified"><option value="draft">待审核草稿</option><option value="reviewed">人工审核完成</option></select></label></div><label class="block">摘要<textarea id="reportAbstract" rows="5" placeholder="概述本月煤炭市场运行特征、主要变量与下月预期。"></textarea></label><div id="sectionEditors"></div><h3>煤价预测表（人工录入）</h3><div class="table-scroll"><table class="edit-table"><thead><tr><th>月份</th><th>点预测(元/吨)</th><th>下限</th><th>上限</th><th>走势</th></tr></thead><tbody id="forecastRows"></tbody></table></div><button class="quiet" id="addForecast">添加预测行</button><div id="checkOutput"></div></div>
+ </section>
+ <section data-section="official" class="view">
+  <div class="section-title"><p class="eyebrow">OFFICIAL SOURCES</p><h1>国家统计局公开数据</h1><p>GitHub Actions可按计划检查国家统计局能源生产公告。页面仅展示候选信息，并不擅自认定已核验。</p></div>
+  <div class="panel"><div class="panel-head"><div><h2>公开候选公告</h2><p id="officialUpdated">正在读取更新记录…</p></div><button id="refreshOfficial" class="quiet">重新读取</button></div><div id="officialList" class="official-list">加载中…</div></div>
+  <div class="notice">若官方结构变更、GitHub计划任务延迟或因访问限制失败，显示的数据可能不完整。请点击国家统计局原文核对。<a href="https://www.stats.gov.cn/sj/zxfb/" target="_blank" rel="noopener">国家统计局最新发布</a></div>
+ </section>
+ <section data-section="ai" class="view">
+  <div class="section-title"><p class="eyebrow">AI WRITING WORKFLOW</p><h1>AI 辅助写作</h1><p>公开版优先保护用户密钥及上传数据：生成结构化提示词，由用户主动复制到自己的大模型。</p></div>
+  <div class="two"><div class="panel"><h2>选择待分析内容</h2><div class="form-grid"><label>报告章节<select id="aiSection"></select></label><label>重点指标<select id="aiIndicator"></select></label></div><label class="block">额外分析重点<textarea id="aiNotes" rows="4" placeholder="例如：重点分析供给恢复、动力煤价格与进口变化；禁止编造预测值。"></textarea></label><div class="actions"><button id="makePrompt" class="primary">生成分析提示词</button><button id="copyPrompt" class="quiet">复制提示词</button></div></div><div class="panel"><h2>AI分析提示词</h2><textarea id="aiPrompt" class="prompt" rows="17" placeholder="选择章节和指标后点击生成。" aria-label="生成的AI提示词"></textarea><p class="tiny">提示词会包含你选定的指标记录。粘贴到外部AI前，请核对资料是否允许外发。</p></div></div>
+  <div class="notice warn">GitHub Pages本身无法托管安全的AI密钥或Python代理服务。要实现多人独立、自动调用DeepSeek/千问并将结果写回网站，需要额外部署带用户认证和额度控制的后端。</div>
+ </section>
+ </main>
+ <footer>煤炭市场月报智能编制平台 · 公开版 V1.1 · 研究辅助工具，输出须人工复核</footer>
+</div></div>
+<div id="toast" role="status" aria-live="polite"></div>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" defer></script>
+<script src="./app.js" defer></script>
+</body></html>

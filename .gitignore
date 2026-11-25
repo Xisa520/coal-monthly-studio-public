@@ -1,0 +1,19 @@
+# NO internal worksheets, reports, source work files, secrets, or generated artifacts
+.env
+.env.*
+*.db
+*.sqlite*
+*.xls
+*.xlsx
+*.xlsm
+*.doc
+*.docx
+*.pdf
+*.csv
+*.zip
+__pycache__/
+.pytest_cache/
+*.pyc
+.DS_Store
+node_modules/
+.DS_Store
