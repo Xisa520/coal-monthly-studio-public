@@ -3,9 +3,10 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="referrer" content="no-referrer">
-<title>煤炭市场月报智能编制平台 · 公开版</title>
+<title>煤炭市场数据图谱 V3.0 · 全量月报图表工作台</title>
 <link rel="stylesheet" href="./style.css">
 <link rel="stylesheet" href="./atlas.css">
+<link rel="stylesheet" href="./workbook-lab.css">
 </head>
 <body>
 <div class="layout">
@@ -13,6 +14,7 @@
  <div class="brand"><div class="logo">煤</div><div><b>煤炭市场研究台</b><small>PUBLIC RESEARCH STUDIO</small></div></div>
  <div class="nav-label">研究工作区</div>
  <button class="nav active" data-view="atlas">▦　煤炭数据图谱 <small class="atlas-pill">内置数据</small></button>
+ <button class="nav" data-view="workbookLab">◈　月报42图·全表分析 <small class="atlas-pill">新增</small></button>
  <button class="nav" data-view="dashboard">▧　上传指标看板</button>
  <button class="nav" data-view="upload">▤　Excel 数据导入</button>
  <button class="nav" data-view="report">▣　月报编辑与导出</button>
@@ -27,10 +29,11 @@
  <section data-section="atlas" class="view active atlas-view" id="atlasView">
    <div class="atlas-hero">
      <div class="atlas-hero-copy"><div class="atlas-eyebrow">COAL MARKET · DATA INTELLIGENCE CENTER / 2026</div>
-     <h1>煤炭市场<span>数据图谱</span></h1><p>基于你提供的年报数据底稿，直接展示全国产量、分省区结构、煤炭进口与投资走势。无需先上传，打开即可分析。</p>
+     <h1>煤炭市场<span>数据图谱 V3.0</span></h1><p>基于你提供的年报数据底稿，直接展示全国产量、分省区结构、煤炭进口与投资走势。公开统计数据无需上传即可分析；新增的九月月报42幅原图与21张工作表支持本地一键加载、完整浏览。</p>
      <div class="atlas-hero-notes"><span>◉　内置历史统计数据</span><span>◈　多年份交互对比</span><span>◫　数据来源可追溯</span></div></div>
      <div class="atlas-hero-side"><div class="atlas-orbit"><div class="atlas-orbit-dot"></div><div class="atlas-orbit-center">煤<br><small>数据引擎</small></div></div><div class="atlas-hero-foot">STATISTICS / CHARTS / ANALYSIS</div></div>
    </div>
+   <div class="lab-callout"><div><b>新增 · 2026年9月月报原表全量分析</b><p>已建立21张工作表、42幅原图的识别目录。点击进入完整工作台，上传九月原表即可批量可视化并导出；原数据仅保留在访问者浏览器内。</p></div><button type="button" data-switch="workbookLab" class="primary">打开42图工作台 →</button></div>
    <div class="atlas-sectionlabel"><div><small>KEY INDICATORS</small><h2>核心指标速览</h2></div><span id="atlasDatasetCount">读取历史统计数据中…</span></div>
    <div class="atlas-kpis" id="atlasKpis"><div class="atlas-loading">正在装载已内置的年度数据…</div></div>
    <div class="atlas-sectionlabel"><div><small>MARKET SNAPSHOT</small><h2>市场运行全景</h2></div><span>点击图卡进入专题分析</span></div>
@@ -51,6 +54,20 @@
    <div class="atlas-local-summary"><h3>内置指标 vs. 本地工作数据</h3><div class="atlas-split"><div><b>公开统计图库</b><strong id="atlasPublicNum">—</strong><small>打开网站即显示，来自筛选后的历史统计底稿</small></div><div><b>浏览器自动识别</b><strong id="atlasLocalNum">0</strong><small>工作表指标数量；仅当前网页会话可见</small></div></div><p><b>公开发布边界：</b>集团经营数据、付费市场监测数据及内部月报原文不直接写入公开仓库。原始文件在用户浏览器读取，其他访问者不可见。</p></div></div>
    <div class="atlas-disclaimer">数据说明：预置图表由你提供的《2026年年报数据+图—煤炭篇回顾》筛选生成，保留原表数值、单位和工作表来源。尚未对全部指标进行国家统计局/海关逐项联网核验。正式对外使用须核对统计口径、引用权和修订值。</div>
  </section>
+
+ <section data-section="workbookLab" class="view lab-view" id="workbookLab">
+   <div class="lab-head"><div><p class="lab-eyebrow">MONTHLY COAL MARKET · SEPTEMBER 2026</p><h1>月报数据 · <span>全量图表工作台</span></h1><p>基于《【1】月报数据-作图-2026年09月.xlsx》的真实结构，逐张复现原表可用图表，并支持对任意工作表列组合出图。</p></div><span class="lab-version">V3.0</span></div>
+   <div class="lab-kpis"><div><small>原始工作表</small><strong id="labSheetCount">21</strong><span>全部纳入目录</span></div><div><small>Excel内置图表</small><strong id="labChartCount">42</strong><span>原图引用关系解析</span></div><div><small>异常图表</small><strong id="labBrokenCount">4</strong><span>失效/外部引用待修复</span></div><div><small>本地工作簿</small><strong id="labLoadedCount">0</strong><span>仅在当前浏览器读取</span></div></div>
+   <div class="lab-privacy"><span>⌁</span><p><b>公开展示与本地分析分开：</b>已公开的国家统计类型指标仍在左侧“煤炭数据图谱”打开即看。以下42幅图的结构与工作表清单已经内置，但为防止公开内部经营数据和商业监测原表，具体数值需要访问者在浏览器中上传其有权使用的Excel。不会上传到GitHub服务器。</p></div>
+   <div class="lab-upload-panel"><div><h2>加载2026年9月月报底稿</h2><p>一次上传后，自动关联42个原始图表以及21张工作表；不执行Excel宏，也不需要逐列建立图表。</p></div><label for="labFile" class="lab-upload-button">↥　选择Excel，开始绘制</label><input type="file" id="labFile" accept=".xlsx,.xlsm,.xls" hidden><span id="labFileStatus">尚未上传文件 · 已展示完整图表目录</span></div>
+   <div class="lab-subhead"><div><small>BUILT-IN CHART CATALOG</small><h2>原Excel图表 · 全部42幅</h2></div><div class="lab-controls"><select id="labCategory" aria-label="按主题筛选"><option value="全部">全部主题</option></select><input type="search" id="labQuery" placeholder="搜索图表 / 工作表"></div></div>
+   <div class="lab-chart-grid" id="labChartGrid"><p>正在读取原Excel图表清单…</p></div>
+   <div class="lab-focus" id="labFocus"><div class="lab-focus-title"><div><small>SELECTED CHART</small><h2 id="labFocusTitle">选择任意图表</h2><p id="labFocusSubtitle">上传原始文件后可查看全尺寸交互图表。</p></div><div class="lab-tools"><button id="labSvg" type="button">下载SVG</button><button id="labPng" type="button">下载PNG</button><button id="labCsv" type="button">导出CSV</button></div></div><div id="labChartMain" class="lab-chart-main"></div><p id="labChartNotice" class="lab-chart-notice"></p><div id="labChartTable" class="lab-preview"></div></div>
+   <div class="lab-subhead"><div><small>ALL SHEETS · NO OMISSION</small><h2>工作表完整目录与自助出图</h2></div><span>无原图的工作表同样可以绘图</span></div>
+   <div class="lab-sheet-grid" id="labSheetGrid"></div>
+   <div class="lab-sheet-workbench"><div class="lab-sheet-bar"><label>当前工作表<select id="labSheetSelect"></select></label><label>横坐标列<select id="labXcol"></select></label><label>数值列（可多选）<select id="labYcols" size="6" multiple></select></label><div class="lab-sheet-actions"><button class="primary" type="button" id="labDrawSheet">生成列对比图</button><button type="button" id="labDownloadSheet">下载表格CSV</button></div></div><div id="labSheetChart" class="lab-chart-main lab-sheet-chart"></div><div id="labSheetTable" class="lab-preview"></div><p class="lab-sheet-hint" id="labSheetHint">上传九月原始工作簿后，可选择任何工作表并生成折线图，且可预览其数据。</p></div>
+ </section>
+
  <section data-section="dashboard" class="view">
   <div class="intro"><div><p class="eyebrow">COAL MARKET INTELLIGENCE</p><h1>煤炭市场月报智能编制平台</h1><p>从数据上传、指标比较到报告初稿，实现可追溯、可复核的煤炭市场分析流程。</p></div><button class="primary" data-switch="upload">导入数据 →</button></div>
   <div class="cards"><div class="metric"><small>已导入指标</small><strong id="metricIndicators">0</strong><span>个指标序列</span></div><div class="metric"><small>数据记录总数</small><strong id="metricRows">0</strong><span>条记录</span></div><div class="metric"><small>本月已完成章节</small><strong id="metricSections">0/6</strong><span>月报编写进度</span></div></div>
@@ -80,7 +97,7 @@
   <div class="notice warn">GitHub Pages本身无法托管安全的AI密钥或Python代理服务。要实现多人独立、自动调用DeepSeek/千问并将结果写回网站，需要额外部署带用户认证和额度控制的后端。</div>
  </section>
  </main>
- <footer>煤炭市场数据图谱 · 公共统计版 V2.0 · 研究辅助工具，输出须人工复核</footer>
+ <footer>煤炭市场数据图谱 · 公共统计与全表分析版 V3.0 · 研究辅助工具，输出须人工复核</footer>
 </div></div>
 <div id="toast" role="status" aria-live="polite"></div>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" defer></script>
@@ -88,4 +105,6 @@
 <script src="./app.js" defer></script>
 <script src="./data/coal-public.js" defer></script>
 <script src="./atlas.js" defer></script>
+<script src="./data/monthly-chart-catalog.js" defer></script>
+<script src="./workbook-lab.js" defer></script>
 </body></html>
