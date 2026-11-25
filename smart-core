@@ -1,0 +1,66 @@
+/* V4.0: deterministic parsing, mapping, provenance and missing-period detection. No network/AI. */
+(function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;root.CoalSmartCore=api;})(typeof globalThis!=='undefined'?globalThis:this,function(){
+'use strict';
+const METRICS=[
+ {id:'coal_output',name:'原煤产量',test:/原煤产量|煤炭产量|煤产量|raw.coal/i,unit:'万吨',category:'生产'},
+ {id:'coal_import',name:'煤炭进口量',test:/煤炭进口|进口煤炭|进口煤(?!价)|进口量/,unit:'万吨',category:'进口'},
+ {id:'coal_consumption',name:'煤炭消费量',test:/煤炭消费|煤炭消耗|商品煤消费/,unit:'万吨',category:'需求'},
+ {id:'coal_rail',name:'铁路煤炭发运量',test:/铁路.*(煤炭|发运|运量)|大秦线.*发运/,unit:'万吨',category:'运输'},
+ {id:'coal_stock',name:'煤炭库存',test:/港口.*库存|煤炭库存|煤炭存煤|电厂存煤|库存合计/,unit:'万吨',category:'库存'},
+ {id:'coal_daily_use',name:'电厂煤炭日耗',test:/日耗|日均耗煤/,unit:'万吨/日',category:'需求'},
+ {id:'stock_days',name:'存煤可用天数',test:/可用天数|存煤天数/,unit:'天',category:'库存'},
+ {id:'contract_price',name:'动力煤长协价',test:/长协价|长协煤价|年度长协/,unit:'元/吨',category:'价格'},
+ {id:'thermal_price',name:'动力煤市场价',test:/煤价|动力煤.*(价格|平仓价|市场价)|秦皇岛.*(价格|5500)/,unit:'元/吨',category:'价格'},
+ {id:'thermal_generation',name:'火电发电量',test:/火电发电量|火力发电量/,unit:'亿千瓦时',category:'需求'},
+ {id:'steel',name:'生铁产量',test:/生铁产量/,unit:'万吨',category:'需求'},
+ {id:'cement',name:'水泥产量',test:/水泥产量/,unit:'万吨',category:'需求'},
+ {id:'port_trans',name:'港口煤炭调出量',test:/港口.*(调出|吞吐|发运)/,unit:'万吨',category:'运输'},
+ {id:'investment',name:'煤炭开采投资',test:/煤炭.*(投资|采选)/,unit:'亿元',category:'投资'}
+];
+function clean(v){return String(v??'').replace(/\s+/g,'').replace(/[（）()]/g,'').trim()}
+function normalize(v){return clean(v).toLowerCase().replace(/[—–－]/g,'-')}
+function metricOf(label){let t=normalize(label);let found=METRICS.find(x=>x.test.test(t));return found?{id:found.id,name:found.name,unit:found.unit,category:found.category,confidence:'词典匹配'}:{id:'custom_'+t.slice(0,40),name:String(label||'未命名指标').slice(0,80),unit:'',category:'其他',confidence:'待确认'}}
+function unitOf(label,defaultUnit=''){let s=String(label||'');let m=s.match(/[（(](万吨\/日|万吨|亿吨|元\/吨|美元\/吨|亿千瓦时|万千瓦时|元|万吨\/年|%|天|亿元|亿立方米)[）)]/);return m?m[1]:defaultUnit||''}
+function num(v){if(typeof v==='number')return Number.isFinite(v)?v:null;if(typeof v!=='string')return null;let s=v.replace(/[,，\s]/g,'').replace(/[％%]$/,'').trim();if(!/^[-+]?\d+(\.\d+)?$/.test(s))return null;let n=Number(s);return Number.isFinite(n)?n:null}
+function parseTime(v, fallbackYear){
+ if(v instanceof Date&&!isNaN(+v))return {period:v.toISOString().slice(0,10),frequency:'day',label:v.toISOString().slice(0,10)};
+ if(typeof v==='number'&&v>=2000&&v<=2100&&Number.isInteger(v))return{period:String(v),frequency:'year',label:String(v)};
+ if(typeof v==='number'&&v>30000&&v<80000){const d=new Date(Date.UTC(1899,11,30)+v*864e5);if(!isNaN(+d))return{period:d.toISOString().slice(0,10),frequency:'day',label:d.toISOString().slice(0,10)}};
+ let s=String(v??'').trim().replace(/[—–－至~～]/g,'-').replace(/\s/g,'');if(!s)return null;
+ let q=s.match(/^(20\d{2})年?(?:1[-](\d{1,2})月?份?|(?:(\d{1,2})[-](\d{1,2}))月?份?)$/);
+ if(q){let m=Number(q[2]||q[4]);if(m>=1&&m<=12)return{period:q[1]+'-'+String(m).padStart(2,'0'),frequency:'cumulative',label:s};}
+ let m=s.match(/^(20\d{2})[年.\/-](\d{1,2})[月.\/-](\d{1,2})日?(?:T.*)?$/);
+ if(m&&+m[2]>=1&&+m[2]<=12&&+m[3]>=1&&+m[3]<=31)return{period:m[1]+'-'+m[2].padStart(2,'0')+'-'+m[3].padStart(2,'0'),frequency:'day',label:s};
+ m=s.match(/^(20\d{2})[年.\/-](\d{1,2})月?份?$/);if(m&&+m[2]>=1&&+m[2]<=12)return{period:m[1]+'-'+m[2].padStart(2,'0'),frequency:'month',label:s};
+ m=s.match(/^(20\d{2})年?$/);if(m)return{period:m[1],frequency:'year',label:s};
+ m=s.match(/^1[-](\d{1,2})月?份?$/);if(m&&fallbackYear&&+m[1]>=2&&+m[1]<=12)return{period:String(fallbackYear)+'-'+m[1].padStart(2,'0'),frequency:'cumulative',label:s};
+ m=s.match(/^(\d{1,2})月?份?$/);if(m&&fallbackYear&&+m[1]>=1&&+m[1]<=12)return{period:String(fallbackYear)+'-'+m[1].padStart(2,'0'),frequency:'month',label:s};
+ return null;
+}
+function headerScore(row){return row.slice(0,30).reduce((s,v)=>{if(parseTime(v))return s+0.03;return s+(/日期|时间|月份|年份|地区|省份|产量|消费|进口|价格|平仓价|长协价|库存|日耗|合计|统计期|202[0-9]年?|同比/.test(String(v??''))?2:0)+(typeof v==='string'&&v.trim()?0.2:0)},0)}
+function findHeader(rows){let score=-1,idx=0;for(let i=0;i<Math.min(12,rows.length);i++){const q=headerScore(rows[i]||[]);if(q>score){score=q;idx=i}}return idx;}
+function findTimeColumn(head,rows,index){let cand=head.findIndex(x=>/^(日期|统计日期|统计期|年月|时间|月份|年份|年|date|month|period)$/.test(clean(x).toLowerCase()));if(cand>=0)return cand;
+ let ranks=Array.from({length:Math.min(Math.max(...rows.slice(0,10).map(x=>x.length),1),60)},(_,i)=>({i,n:rows.slice(index+1,index+15).filter(r=>(!(typeof r[i]==='number'&&r[i]>30000)&&parseTime(r[i]))).length})).sort((a,b)=>b.n-a.n);return ranks[0]?.n>=2?ranks[0].i:-1;}
+function inferYear(text){let s=String(text);let m=s.match(/(?:20\d{2})/);return m?Number(m[0]):null}
+function inferScope(text){let s=String(text);let m=s.match(/(山西|陕西|内蒙古|新疆|河北|山东|河南|江苏|广东|广西|浙江|福建|辽宁|吉林|黑龙江|宁夏|甘肃|青海|贵州|云南|四川|重庆|北京|天津|上海|安徽|湖北|湖南|江西|海南|西藏)/);return m?m[0]:'全国/未指定'}
+function colLetter(i){let s='';for(let x=i+1;x>0;x=Math.floor((x-1)/26))s=String.fromCharCode(65+(x-1)%26)+s;return s;}
+function idOf(r){return [r.metricId,r.scope,r.period,r.frequency,r.unit].map(x=>String(x??'').replaceAll('|','/')).join('|')}
+function detectSheets(books,{recordLimit=24000}={}){let groups=[],count=0,issues=[];
+ for(const bk of books){for(const sh of bk.sheets){if(count>=recordLimit){issues.push('达到单次提取上限：'+recordLimit);break;}let rows=sh.rows||[];if(!rows.length)continue;const hr=findHeader(rows),heads=(rows[hr]||[]).map(x=>String(x??''));let tCol=findTimeColumn(heads,rows,hr),fallbackYear=inferYear(sh.name)||inferYear(bk.name);
+ // Orientation 1: one date or category column, other columns are years.
+ let yearCols=heads.map((h,i)=>({i,y:inferYear(h),s:String(h)})).filter(x=>x.y>=2000&&x.y<=2100&&/^(20\d{2})(年)?$/.test(clean(x.s)));
+ const monthish=rows.slice(hr+1,hr+15).filter(r=>/^(?:1[-—–－]2|\d{1,2})月?份?$/.test(String(r[0]??'').replace(/\s/g,''))).length;
+ if(yearCols.length>=2&&monthish>=2){let records=[];const metric=metricOf(sh.name);for(let ri=hr+1;ri<rows.length&&records.length<4000;ri++){let row=rows[ri],label=row[0];for(let c of yearCols){let tp=parseTime(label,c.y),value=num(row[c.i]);if(tp&&value!==null)records.push({metricId:metric.id,metric:metric.name,unit:unitOf(sh.name,metric.unit),scope:inferScope(sh.name),period:tp.period,frequency:tp.frequency,periodLabel:tp.label,value,sourceType:'upload',sourceFile:bk.name,sourceSheet:sh.name,cell:colLetter(c.i)+(ri+1),status:'pending'});}}
+ if(records.length){groups.push({id:bk.name+'|'+sh.name+'|wide',file:bk.name,sheet:sh.name,label:metric.name+'（跨年月份宽表）',type:'wide',rows:records,confidence:'跨年列规则',headerRow:hr+1});count+=records.length;continue;}}
+ if(tCol<0&&yearCols.length){let firstCol=0,records=[];for(let ri=hr+1;ri<rows.length;ri++){const sc=String(rows[ri]?.[firstCol]??'').trim();if(!sc)continue;for(let c of yearCols){let v=num(rows[ri]?.[c.i]);if(v===null)continue;let metric=metricOf(sh.name);records.push({metricId:metric.id,metric:metric.name,unit:unitOf(sh.name,metric.unit),scope:sc,period:String(c.y),frequency:'year',periodLabel:String(c.y),value:v,sourceType:'upload',sourceFile:bk.name,sourceSheet:sh.name,cell:colLetter(c.i)+(ri+1),status:'pending'});}}
+ if(records.length>=2){groups.push({id:bk.name+'|'+sh.name+'|years',file:bk.name,sheet:sh.name,label:sh.name+'（年度×地区）',type:'wide-region',rows:records.slice(0,4000),confidence:'列标题年份',headerRow:hr+1});count+=records.length;continue;}}
+ if(tCol<0){issues.push(`${bk.name} / ${sh.name}：未识别时间列，建议使用V3.0手动列映射`);continue;}
+ const cols=[];for(let ci=0;ci<Math.min(heads.length,100);ci++){if(ci===tCol||/同比|环比|增幅|增速|变化率|涨跌/.test(heads[ci]))continue;let numCount=0;for(let ri=hr+1;ri<Math.min(rows.length,hr+25);ri++){if(num(rows[ri][ci])!==null)numCount++}if(numCount<2)continue;let name=heads[ci]||sh.name;let metric=metricOf(name==='数值'||name==='值'?sh.name:name);cols.push({ci,label:name,metric});}
+ for(let col of cols.slice(0,36)){let out=[],name=col.metric.name;const unit=unitOf(col.label,unitOf(sh.name,col.metric.unit));for(let ri=hr+1;ri<rows.length&&out.length<4000;ri++){const r=rows[ri],tp=parseTime(r[tCol],fallbackYear),value=num(r[col.ci]);if(!tp||value===null)continue;let loc=heads.findIndex((x,i)=>i!==tCol&&/省份|地区|区域/.test(x));let scope=loc>=0&&String(r[loc]||'').trim()?String(r[loc]).trim().slice(0,36):inferScope(sh.name);out.push({metricId:col.metric.id,metric:col.metric.name,unit,scope,period:tp.period,frequency:tp.frequency,periodLabel:tp.label,value,sourceType:'upload',sourceFile:bk.name,sourceSheet:sh.name,cell:colLetter(col.ci)+(ri+1),status:'pending'});}
+ if(out.length){groups.push({id:bk.name+'|'+sh.name+'|'+col.ci,file:bk.name,sheet:sh.name,label:`${name} · ${sh.name} · ${col.label}`,type:'long',rows:out,confidence:col.metric.confidence,headerRow:hr+1,timeColumn:colLetter(tCol),valueColumn:colLetter(col.ci)});count+=out.length;}
+ }
+ }}return{groups,issues,total:count};}
+function planMerge(existing,incoming){const map=new Map(existing.map(r=>[idOf(r),r]));const result={newRecords:[],same:[],conflicts:[]};for(const r of incoming){let k=idOf(r),old=map.get(k);if(!old)result.newRecords.push({...r,key:k});else if(Number(old.value)===Number(r.value))result.same.push({old,incoming:r});else result.conflicts.push({key:k,old,incoming:r});map.set(k,old||r)}return result;}
+function gaps(rows,{metricId,scope,frequency='month',from,to}={}){let subset=rows.filter(r=>(!metricId||r.metricId===metricId)&&(!scope||r.scope===scope)&&r.frequency===frequency&&/^20\d{2}(-\d{2})?(-\d{2})?$/.test(r.period));const existing=new Set(subset.map(r=>r.period));if(!subset.length&&!from)return[];let start=from||subset.map(x=>x.period).sort()[0],end=to||subset.map(x=>x.period).sort().at(-1);if(!start||!end||start>end)return[];let out=[];if(frequency==='year'){for(let y=+start;y<=+end&&out.length<180;y++){let p=String(y);if(!existing.has(p))out.push(p)}}else if(frequency==='month'){let a=Number(start.slice(0,4))*12+Number(start.slice(5,7))-1,b=Number(end.slice(0,4))*12+Number(end.slice(5,7))-1;for(let n=a;n<=b&&out.length<180;n++){let y=Math.floor(n/12),m=n%12+1,p=y+'-'+String(m).padStart(2,'0');if(!existing.has(p))out.push(p)}}return out;}
+return {METRICS,metricOf,unitOf,num,parseTime,findHeader,detectSheets,idOf,planMerge,gaps};
+});
